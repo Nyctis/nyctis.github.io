@@ -1,0 +1,54 @@
+<!-- Beetle Server | Turn a GPU server into a seller on the Beetle network. -->
+<div class="page">
+  <header class="phead">
+    <p class="label">Beetle Server</p>
+    <h1>Put a GPU server on the market</h1>
+    <p class="lede">Set your price. Buyers connect directly and pay in USDC.</p>
+      </header>
+</div>
+<section class="band">
+  <div class="side">
+    <p class="label">How it works</p>
+    <h2>From install to payout</h2>
+  </div>
+  <figure class="scene" data-scene="host"></figure>
+</section>
+<section class="band">
+  <div class="side">
+    <p class="label">Setup</p>
+    <h2>A command line and systemd</h2>
+    <p class="dim">Ubuntu 22.04, an NVIDIA driver and Docker.</p>
+  </div>
+  <pre class="term" data-type><span class="ln"><span class="p">$ </span><span class="cmd">node/install.sh</span>
+</span><span class="ln"><span class="p">$ </span><span class="cmd">source .venv/bin/activate</span>
+</span><span class="ln"><span class="p">$ </span><span class="cmd">beetle host init --chain chain.json --public-addr IP:41710 --stun HOST:PORT</span>
+</span><span class="ln"><span class="p">$ </span><span class="cmd">beetle host doctor</span>
+</span><span class="ln"><span class="p">$ </span><span class="cmd">beetle host list --models qwen3.5-2b --train-usd-per-mtok 20 --infer-in 1 --infer-out 3 --vllm-serve qwen3.5-2b</span>
+</span><span class="ln"><span class="p">$ </span><span class="cmd">sudo systemctl enable --now beetle-host</span></span></pre>
+</section>
+<section class="band">
+  <div class="side">
+    <p class="label">What you sell</p>
+    <h2>Training, inference or both</h2>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Offer</th><th>Priced by</th><th>Needs</th></tr></thead>
+    <tbody>
+      <tr><td>Training</td><td>Million training tokens</td><td>GPU, Docker, sandbox image</td></tr>
+      <tr><td>Inference</td><td>Million tokens, in and out</td><td>An OpenAI-compatible backend, such as vLLM</td></tr>
+    </tbody>
+  </table></div>
+</section>
+<section class="band">
+  <div class="side">
+    <p class="label">Stake</p>
+    <h2>A bond to list</h2>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Machine</th><th>Tier</th><th class="num">Minimum stake</th></tr></thead>
+    <tbody>
+      <tr><td>GPU server</td><td class="m">T3-C</td><td class="num">$10</td></tr>
+    </tbody>
+  </table></div>
+  <p class="cap">A first listing stakes about $20 to $25.</p>
+</section>

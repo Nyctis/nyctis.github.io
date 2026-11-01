@@ -1,0 +1,25 @@
+<!-- Keeping the chain out of sight | Why Beetle uses a chain, why we did not write one, and what it does for you. -->
+<div class="wrap">
+<article class="post">
+  <p class="by"><time datetime="2026-10-31">2026-10-31</time></p>
+  <h1>Keeping the chain out of sight</h1>
+  <p class="lede">Most people who want private compute do not want to think about a blockchain. We use one anyway, for two jobs, and we designed the client so you never have to look at it.</p>
+
+  <h2>The two jobs</h2>
+  <p>Two strangers need to exchange money without a company in the middle, and they need to find each other without a server that learns who talks to whom. A public chain does both. It holds payment in escrow under rules nobody runs by hand, and it stores a few hundred sealed bytes so that two machines can meet.</p>
+  <p>Everything else stays off it. Data, weights, scores and tokens never touch the chain. Evidence is checked on the buyer's machine. Packets travel directly between the two machines, so the chain has no part in the traffic.</p>
+
+  <h2>Why we did not write our own</h2>
+  <p>We took this question seriously. One million jobs a day comes to under 100 transactions per second, which is well within what Solana carries. The one workload that would strain a chain is recording every token, and a payment channel handles that for far less effort than a new network.</p>
+  <p>Our own chain would have required bridged USDC, a validator set paid with a token or run by us, and months of engineering. Hyperliquid had good reasons for its own chain: every order needs deterministic ordering in milliseconds. A training job runs for minutes or hours and settles in a handful of transactions.</p>
+
+  <h2>Why Solana</h2>
+  <p>It has native USDC, fast confirmation and low fees, and there is no single sequencer. The Solana Foundation's payment-channel program already exists, so per-token payment needed no new chain code. All chain access goes through one file, so the rest of the code stays independent of the chain.</p>
+
+  <h2>A contract with no referee</h2>
+  <p>The program pays out only on objective facts: a signature, a deadline, a seller who never started. Nobody at Nyctis decides a dispute. There is no token. You pay in dollars, in USDC.</p>
+
+  <h2>What you see</h2>
+  <p>You see a price in dollars, a command that finishes, and a proof card that says what happened. <a href="{{base}}protocol/">The protocol page</a> lists the rest.</p>
+</article>
+</div>

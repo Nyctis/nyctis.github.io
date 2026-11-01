@@ -1,0 +1,167 @@
+<!-- Protocol | How Beetle uses Solana: what goes on chain, the 33 instructions, how money settles, and how two machines find each other. -->
+<div class="doc">
+<nav class="toc" aria-label="On this page">
+  <a href="#job">One training job</a>
+  <a href="#boundary">On and off chain</a>
+  <a href="#why">Why Solana</a>
+  <a href="#instructions">Instructions</a>
+  <a href="#settle">Settlement</a>
+  <a href="#fail">When things fail</a>
+  <a href="#bond">Bonds</a>
+  <a href="#infer">Inference payment</a>
+  <a href="#meet">Finding a peer</a>
+  <a href="#cost">Cost</a>
+</nav>
+<div class="body">
+<header class="head">
+  <p class="label">Protocol</p>
+  <h1>A market with no referee</h1>
+  <p class="lede">One Anchor program on Solana and one payment-channel program. Money moves only on facts the program can check.</p>
+</header>
+
+<section class="block" id="job">
+  <h2>One training job</h2>
+  <figure class="scene" data-scene="market"></figure>
+  <div class="tbl"><table>
+    <thead><tr><th>#</th><th>Step</th><th>What happens</th><th>On chain</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Pick</td><td>You read seller offers straight from the chain. There is no matchmaker.</td><td class="m">read only</td></tr>
+      <tr><td>2</td><td>Escrow</td><td>Your payment is locked with the seller's bond in one transaction.</td><td class="m">open_job</td></tr>
+      <tr><td>3</td><td>Connect</td><td>Both sides exchange sealed addresses, then dial each other at the same moment.</td><td class="m">rdv_open<br>rdv_answer</td></tr>
+      <tr><td>4</td><td>Upload</td><td>Sealed inputs go straight to the seller, padded to fixed sizes.</td><td class="m">nothing</td></tr>
+      <tr><td>5</td><td>Attest</td><td>The sandbox starts with no network interface, creates one-time keys and produces evidence.</td><td class="m">start</td></tr>
+      <tr><td>6</td><td>Decide</td><td>Your machine checks the evidence against your floor, then releases the data key or refuses.</td><td class="m">release_key<br>reject_evidence</td></tr>
+      <tr><td>7</td><td>Run</td><td>The sandbox measures a baseline, trains, then scores the result on hidden questions.</td><td class="m">nothing</td></tr>
+      <tr><td>8</td><td>Deliver</td><td>The sealed adapter arrives first, the result goes on chain next, and the adapter key arrives last.</td><td class="m">submit_result</td></tr>
+      <tr><td>9</td><td>Settle</td><td>You confirm the adapter changes real answers, then accept. Each side collects separately.</td><td class="m">accept<br>claim</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="block" id="boundary">
+  <h2>What goes on chain</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>On chain</th><th>Off chain</th><th>Reason</th></tr></thead>
+    <tbody>
+      <tr><td>Escrow, bonds, settlement</td><td>Training data, weights, adapters</td><td>Money needs rules nobody runs by hand. Data does not belong on a public ledger</td></tr>
+      <tr><td>Offers: price, capacity, claimed tier</td><td>Evidence itself</td><td>The program does not judge evidence</td></tr>
+      <tr><td>Environment keys, sealed data key, evidence hash</td><td>Scores and logs</td><td>Scores stay in a private report only the buyer can open</td></tr>
+      <tr><td>Sealed addresses</td><td>Plaintext addresses</td><td>Chain data is public forever. Only a seller who opts in publishes an address in the clear</td></tr>
+      <tr><td>Channel open and final settlement</td><td>Tokens and per-request usage</td><td>Throughput, and usage would otherwise be public forever</td></tr>
+    </tbody>
+  </table></div>
+  <p class="cap">The buyer's decision rests on evidence checked on the buyer's own machine.</p>
+</section>
+
+<section class="block" id="why">
+  <h2>Why Solana, and why not our own chain</h2>
+  <p class="dim">One million jobs a day is under 100 transactions per second, which an existing chain can carry. A new chain would add a bridge for USDC and a validator set to run, with nothing to gain. Per-token traffic stays off chain in payment channels.</p>
+  <p class="dim">Solana gives us native USDC, fast confirmation, low fees, no single sequencer, and a payment-channel program from the Solana Foundation. <a href="{{base}}notes/keeping-the-chain-out-of-sight/">The full reasoning</a></p>
+</section>
+
+<section class="block" id="instructions">
+  <h2>The 33 instructions</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Group</th><th>Instructions</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>Configuration</td><td class="m">init_config</td><td>Writes the token and parameters once</td></tr>
+      <tr><td>Seller</td><td class="m">register_seller, set_operator, rotate_net_pk</td><td>Cold key, hot key and address key</td></tr>
+      <tr><td>Stake</td><td class="m">stake, request_unstake, cancel_unstake, withdraw_stake</td><td>USDC bond with a seven-day exit cooldown</td></tr>
+      <tr><td>Offers</td><td class="m">post_offer, update_offer, touch_offer, pause_offer, close_offer</td><td>Price, capacity and heartbeat. Offers expire within seven days</td></tr>
+      <tr><td>Open</td><td class="m">open_job, decline_job, abort_unstarted</td><td>Escrow the price and lock the bond. The seller may decline. A failed connection refunds</td></tr>
+      <tr><td>Start</td><td class="m">start</td><td>Declares sandbox keys and the evidence hash</td></tr>
+      <tr><td>Key</td><td class="m">release_key, reject_evidence, claim_no_release</td><td>The buyer releases or refuses. If the buyer stays silent, anyone can end the job</td></tr>
+      <tr><td>Deliver</td><td class="m">submit_result</td><td>Verifies the sandbox's Ed25519 signature and the agreed terms</td></tr>
+      <tr><td>Finish</td><td class="m">accept, reject, finalize</td><td>Full price if the buyer accepts, the floor if the buyer rejects or stays silent</td></tr>
+      <tr><td>Fail</td><td class="m">timeout_start, timeout_run, abort_job</td><td>Fixed refunds and slashing</td></tr>
+      <tr><td>Collect</td><td class="m">claim</td><td>Each party collects separately, so one frozen account cannot block the other</td></tr>
+      <tr><td>Rendezvous</td><td class="m">rdv_open, rdv_answer, rdv_reoffer, rdv_fail, rdv_close</td><td>Stores sealed bytes and records who wrote them</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="block" id="settle">
+  <h2>Settlement</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Signed outcome</th><th>Meaning</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Passed</td><td>Met the acceptance rule</td><td>Full price if the buyer accepts. Floor if the buyer rejects or stays silent</td></tr>
+      <tr><td>Failed</td><td>Did not meet it. The buyer gets no adapter</td><td>Floor: price × 20% × work done</td></tr>
+      <tr><td>Buyer fault</td><td>Bad input that the seller cannot forge</td><td>5%</td></tr>
+      <tr><td>Inconclusive</td><td>Cause unclear, such as swapped files</td><td>Full refund, no slash</td></tr>
+    </tbody>
+  </table></div>
+  <p class="dim">The sandbox has no network, so everything it sees was carried in by the host. A hash mismatch is therefore never counted against the buyer, because a seller could cause it on purpose.</p>
+</section>
+
+<section class="block" id="fail">
+  <h2>When things fail</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Event</th><th>Who can trigger it</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Seller declines in time</td><td>Seller</td><td>Full refund, no slash</td></tr>
+      <tr><td>No connection, seller never answered</td><td>Either side</td><td>Full refund, no slash</td></tr>
+      <tr><td>No connection, seller answered</td><td>Buyer</td><td>Seller gets $0.01 so that harvesting addresses is not free</td></tr>
+      <tr><td>Seller never starts</td><td>Anyone</td><td>Full refund, 10% of bond slashed with a $0.10 minimum, offer paused</td></tr>
+      <tr><td>Seller quits mid-run</td><td>Seller</td><td>Full refund, 10% of bond slashed</td></tr>
+      <tr><td>Seller runs out of time</td><td>Anyone</td><td>Full refund, 50% of bond slashed</td></tr>
+      <tr><td>Buyer never releases the key</td><td>Anyone</td><td>Seller gets a capped fee, the rest is refunded</td></tr>
+      <tr><td>Evidence refused</td><td>Buyer</td><td>Seller gets a capped fee, the rest is refunded. The data stays ciphertext</td></tr>
+    </tbody>
+  </table></div>
+  <p class="cap">The daemon handles key release, so the buyer must be online for that step. Our node keeps sealed results for seven days by default, so a buyer can collect later.</p>
+</section>
+
+<section class="block" id="bond">
+  <h2>Bonds</h2>
+  <p class="dim">A seller's bond covers turning up and finishing on time. Privacy is handled separately, by the tier you choose in advance.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Parameter</th><th class="num">Value</th></tr></thead>
+    <tbody>
+      <tr><td>Minimum bond ratio</td><td class="num">50% of price</td></tr>
+      <tr><td>Minimum stake, T3-C</td><td class="num">$10</td></tr>
+      <tr><td>Offer stake</td><td class="num">$5</td></tr>
+      <tr><td>Floor</td><td class="num">20% × work done</td></tr>
+      <tr><td>Settlement delay</td><td class="num">3,600 s</td></tr>
+      <tr><td>Unstake cooldown</td><td class="num">7 days</td></tr>
+    </tbody>
+  </table></div>
+  
+</section>
+
+<section class="block" id="infer">
+  <h2>Paying for inference</h2>
+  <figure class="scene" data-scene="pay"></figure>
+  <p class="dim">Inference does not touch the Beetle program. The buyer opens a Solana Foundation payment channel with a one-time session key and deposits a budget. Cumulative vouchers are signed in small steps off chain. At the end the seller settles with the last voucher and the balance returns to the buyer.</p>
+  <ul class="plain dim">
+    <li>A buyer can overpay by at most one step plus the current input. A seller can work unpaid for at most one step.</li>
+    <li>If the seller vanishes, the buyer closes the channel and recovers the rest.</li>
+    <li>If the buyer vanishes, the seller settles with the vouchers it holds.</li>
+    <li>Usage is the smaller of the buyer's count and the seller's count. The session stops if the two drift apart.</li>
+  </ul>
+</section>
+
+<section class="block" id="meet">
+  <h2>How two machines find each other</h2>
+  <figure class="scene" data-scene="net"></figure>
+  <p class="dim">A contract cannot send packets, so the chain replaces a coordination server and nothing more. Each side writes its candidate addresses, sealed to the other, then both dial at the same moment. Addresses stay sealed on chain, so only the two parties can read them.</p>
+  <p class="dim">With relays off, the two machines connect directly. If a link cannot form, Beetle moves to the next seller, up to three, and never goes below your floor.</p>
+</section>
+
+<section class="block" id="cost">
+  <h2>Cost on chain</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Flow</th><th class="num">Transactions</th><th class="num">Fees</th><th class="num">Rent</th></tr></thead>
+    <tbody>
+      <tr><td>One training job, start to finish</td><td class="num">8</td><td class="num">$0.0043</td><td class="num">$0.548</td></tr>
+      <tr><td>One inference session</td><td class="num">3</td><td class="num">$0.0029</td><td class="num">$0.330</td></tr>
+      <tr><td>Vouchers during a session</td><td class="num">0</td><td class="num">$0</td><td class="num">$0</td></tr>
+      <tr><td>One address exchange</td><td class="num">2</td><td class="num">$0.002</td><td class="num">$0.36</td></tr>
+      <tr><td>Keeping an offer listed</td><td class="num">heartbeats</td><td class="num">about $0.07 a day</td><td class="num">$0</td></tr>
+    </tbody>
+  </table></div>
+  <p class="cap">Estimates at SOL $95.93 on 2026-10-31, before priority fees. Rent on job accounts comes back when they close. Rent on a payment channel, about $0.19, is a cost of opening it.</p>
+</section>
+
+</div>
+</div>

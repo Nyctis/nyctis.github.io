@@ -1,0 +1,125 @@
+<!-- Components | Every part of Beetle: what it does and where the code lives. -->
+<div class="doc">
+<nav class="toc" aria-label="On this page">
+  <a href="#layers">Layers</a>
+  <a href="#client">Client</a>
+  <a href="#network">Network</a>
+  <a href="#environment">Environment</a>
+  <a href="#seller">Seller node</a>
+  <a href="#chain">Chain</a>
+  <a href="#models">Models</a>
+</nav>
+<div class="body">
+<header class="head">
+  <p class="label">Components</p>
+  <h1>What Beetle is made of</h1>
+  <p class="lede">Each part below is listed with what it does and where its code lives.</p>
+</header>
+
+<section class="block" id="layers">
+  <h2>Layers</h2>
+  <div class="stack">
+    <div><b>Client<small>your machine</small></b><span>daemon, CLI, local API, SDK, MCP, doctor, policy, proof card</span></div>
+    <div><b>Network<small>between two machines</small></b><span>iroh direct link, sealed channel, file transfer, rendezvous</span></div>
+    <div><b>Environment<small>the seller's machine</small></b><span>sandbox, recipe mode, evidence</span></div>
+    <div><b>Seller node<small>the seller's machine</small></b><span>host daemon, plaintext process, inference gateway, metering</span></div>
+    <div><b>Chain<small>Solana</small></b><span>Beetle program, payment channels</span></div>
+  </div>
+  <p class="dim">Money and addresses go through the chain. Content goes directly between two machines. Keys are created on the buyer's machine and inside the environment, and never pass through a service we run.</p>
+</section>
+
+<section class="block" id="client">
+  <h2>Client</h2>
+  <figure class="scene" data-scene="route"></figure>
+  <p class="dim">Everything on the buyer's machine runs inside one local daemon. The CLI, SDK and MCP tools are its clients, so an agent never holds the wallet.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Component</th><th>What it does</th><th>Code</th></tr></thead>
+    <tbody>
+      <tr><td>Daemon</td><td>Holds the wallet, policy and jobs. Binds to 127.0.0.1 and requires a local token on every call</td><td class="m">client/daemon.py</td></tr>
+      <tr><td>CLI</td><td><code>doctor</code>, <code>market</code>, <code>quote</code>, <code>train</code>, <code>fetch</code>, <code>proof</code>, <code>chat</code>, <code>wallet</code>, <code>approve</code></td><td class="m">client/cli.py</td></tr>
+      <tr><td>Local API</td><td>OpenAI-compatible chat plus <code>/beetle/*</code>. Response headers state the route, tier, model and proof</td><td class="m">client/daemon.py</td></tr>
+      <tr><td>Python SDK</td><td><code>train</code>, <code>chat</code>, <code>hybrid</code>. Spending cap and floor are required arguments</td><td class="m">beetle.py</td></tr>
+      <tr><td>MCP tools</td><td>Ten tools for agents over stdio. Agents can request a limit change but cannot make one</td><td class="m">client/mcp_server.py</td></tr>
+      <tr><td>Doctor and routing</td><td>Measures this machine, then trains remotely and runs here or on a seller</td><td class="m">client/doctor.py<br>client/core.py</td></tr>
+      <tr><td>Policy and ledger</td><td>Effective floor is the strictest of global policy, data label and request. Spend counts settled, escrowed and reserved money</td><td class="m">client/policy.py</td></tr>
+      <tr><td>Datasets</td><td>Registers a path under a name and a label. Agents only ever see the name</td><td class="m">client/datasets.py</td></tr>
+      <tr><td>Buyer flow</td><td>Encrypts inputs, adds canary records, checks evidence, releases the key, verifies reports</td><td class="m">requester/</td></tr>
+      <tr><td>Proof card</td><td>Reports the peer, tier, evidence and path. The wording is fixed in the client</td><td class="m">client/proof.py</td></tr>
+      <tr><td>Effect check</td><td>Asks the same questions with and without the adapter. If nothing changes, it does not switch over</td><td class="m">client/verify.py</td></tr>
+      <tr><td>Local inference</td><td>Runs models on a Mac with mlx-lm</td><td class="m">client/local.py</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="block" id="network">
+  <h2>Network</h2>
+  <p class="dim">Two layers of encryption run over one direct link. The outer layer ends at the host and handles transport. The inner layer ends inside the environment, so the wire only ever carries ciphertext.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Component</th><th>What it does</th><th>Code</th></tr></thead>
+    <tbody>
+      <tr><td>Direct link</td><td>Both sides dial at once over iroh with relays off, and the first connection wins</td><td class="m">net/peer.py</td></tr>
+      <tr><td>Rendezvous</td><td>Exchanges sealed addresses through a chain account, or through memos when no account exists</td><td class="m">net/rendezvous.py</td></tr>
+      <tr><td>Sealed channel</td><td>HPKE to the environment's key, in fixed-size frames, with resume after a dropped link</td><td class="m">net/channel.py</td></tr>
+      <tr><td>File transfer</td><td>1 MiB chunks with SHA-256 checks and resume. Files are padded to fixed sizes</td><td class="m">net/transfer.py</td></tr>
+      <tr><td>Address echo</td><td>Tells a peer the public address it was seen from</td><td class="m">net/echo.py</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="block" id="environment">
+  <h2>Environment</h2>
+  <figure class="scene" data-scene="job"></figure>
+  <p class="dim">The workload container has no network interface. Only ciphertext and public model files go in or come out. What the machine's owner can read depends on the tier, and the evidence decides the tier.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Component</th><th>What it does</th><th>Code</th></tr></thead>
+    <tbody>
+      <tr><td>Sandbox</td><td>Checks that it has no network, creates one-time keys, verifies inputs and the model hash, trains, scores, signs</td><td class="m">sandbox/enclave.py</td></tr>
+      <tr><td>Recipe mode</td><td>A built-in memory recipe with baseline, training, hidden scoring and a regression check</td><td class="m">sandbox/train_eval.py</td></tr>
+      <tr><td>Evidence verifier</td><td>Checks a seller's evidence on the buyer's own machine</td><td class="m">attester/verifier.py</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="block" id="seller">
+  <h2>Seller node</h2>
+  <p class="dim">Linux sellers use a command line and systemd. The daemon holds the wallet and moves ciphertext. The process that sees inference plaintext runs separately and does not read the wallet.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Component</th><th>What it does</th><th>Code</th></tr></thead>
+    <tbody>
+      <tr><td>Host daemon</td><td>Takes jobs, runs the gateway, sends heartbeats, collects what is owed</td><td class="m">node/daemon.py</td></tr>
+      <tr><td>Host CLI and installer</td><td><code>beetle host init</code>, <code>list</code>, <code>run</code>, <code>pause</code>, plus a systemd unit</td><td class="m">node/cli.py<br>node/install.sh</td></tr>
+      <tr><td>Plaintext process</td><td>Handles inference in a separate process that never reads the wallet</td><td class="m">node/environment.py</td></tr>
+      <tr><td>Inference gateway</td><td>Fronts an OpenAI-compatible backend such as vLLM, loads adapters from tmpfs, issues usage receipts</td><td class="m">serve/gateway.py</td></tr>
+      <tr><td>Metering</td><td>Takes the smaller of the two counts, and stops if the seller's report drifts too far</td><td class="m">node/metered.py</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="block" id="chain">
+  <h2>Chain</h2>
+  <p class="dim">Beetle is one Anchor program on Solana, plus the Solana Foundation's payment channels. It settles in USDC and has no token. The program does not judge evidence or quality. It moves money only on objective facts.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Component</th><th>What it does</th><th>Code</th></tr></thead>
+    <tbody>
+      <tr><td>Beetle program</td><td>33 instructions for sellers, offers, bonds, escrow, settlement and address exchange</td><td class="m">programs/beetle/</td></tr>
+      <tr><td>Chain client</td><td>The only code that touches the chain, so the rest stays independent of it</td><td class="m">common/beetle_chain.py</td></tr>
+      <tr><td>Payment channels</td><td>Pay-per-token inference using cumulative vouchers that stay off chain</td><td class="m">external program</td></tr>
+      <tr><td>Crypto wrappers</td><td>HPKE, AES-GCM, Ed25519, padding and hashing. These wrap established libraries</td><td class="m">common/beetle_crypto.py</td></tr>
+    </tbody>
+  </table></div>
+  <p class="cap"><a href="{{base}}protocol/">Protocol details</a></p>
+</section>
+
+<section class="block" id="models">
+  <h2>Models</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Component</th><th>What it does</th><th>Code</th></tr></thead>
+    <tbody>
+      <tr><td>Model profiles</td><td>One file holds every model fact. Adding a model changes nothing else</td><td class="m">common/model_profiles.json</td></tr>
+      <tr><td>Adapter conversion</td><td>Converts adapters from PEFT to MLX and rewrites keys for vLLM</td><td class="m">scripts/peft_to_mlx.py<br>scripts/peft_rekey.py</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+</div>
+</div>

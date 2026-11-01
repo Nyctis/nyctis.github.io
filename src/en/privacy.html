@@ -1,0 +1,66 @@
+<!-- Privacy | How Beetle's privacy tiers work: evidence, floors and the proof card. -->
+<div class="doc">
+<nav class="toc" aria-label="On this page">
+  <a href="#tiers">Tiers</a>
+  <a href="#floors">Floors</a>
+  <a href="#evidence">Evidence</a>
+  <a href="#layers">Two layers of encryption</a>
+  <a href="#proof">Proof card</a>
+  <a href="#agents">Agents</a>
+</nav>
+<div class="body">
+<header class="head">
+  <p class="label">Privacy</p>
+  <h1>A tier states who can read your data</h1>
+  <p class="lede">Evidence decides the tier, and a seller cannot pick one. You choose the tier you need in advance, and the key stays on your machine until a seller meets it.</p>
+</header>
+
+<section class="block" id="tiers">
+  <h2>Tiers</h2>
+  <figure class="scene" data-scene="tiers"></figure>
+  <div class="tbl"><table>
+    <thead><tr><th>Tier</th><th>Machine</th><th>Designed to protect against</th><th>Suitable data</th></tr></thead>
+    <tbody>
+      <tr><td class="m">T0</td><td>Your own machine</td><td>Third parties</td><td>Any</td></tr>
+      <tr><td class="m">T3-C</td><td>Ordinary GPU server</td><td>Strangers on the network</td><td>Public or synthetic data</td></tr>
+    </tbody>
+  </table></div>
+  <p class="cap">On a T3-C seller, the machine's owner can read a job. Keep personal data on your own machine.</p>
+</section>
+
+<section class="block" id="floors">
+  <h2>Floors</h2>
+  <p class="dim">Your floor is the strictest of three things: your global policy, the data's label and this request. It is enforced at key release, so if a job were ever routed to a weaker seller, that seller would still hold only ciphertext.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Data label</th><th>Where it can go</th></tr></thead>
+    <tbody>
+      <tr><td class="m">local_only</td><td>This machine only</td></tr>
+      <tr><td class="m">secret</td><td>This machine</td></tr>
+      <tr><td class="m">personal</td><td>This machine</td></tr>
+      <tr><td class="m">synthetic, public</td><td>Any seller</td></tr>
+    </tbody>
+  </table></div>
+  <p class="cap">No agent API changes a label. An adapter inherits the label of its training data. Beetle never lowers a floor automatically.</p>
+</section>
+
+<section class="block" id="evidence">
+  <h2>Evidence</h2>
+  <p class="dim">Each job's evidence is bound to that job, that specification and that pair of one-time keys. Your machine verifies it locally, so no central service decides for you.</p>
+</section>
+
+<section class="block" id="layers">
+  <h2>Two layers of encryption</h2>
+  <p class="dim">The outer layer is iroh's QUIC and TLS 1.3, which ends at the host and carries traffic. The inner layer is HPKE sealed to the environment's one-time key, in fixed-size frames. Relays, storage and the chain only ever see ciphertext.</p>
+</section>
+
+<section class="block" id="proof">
+  <h2>Proof card</h2>
+  <p class="dim">Every connection ends with a card with two separate lamps: one for the way there, one for the other machine. The client writes the wording. A seller supplies no text.</p>
+</section>
+
+<section class="block" id="agents">
+  <h2>Agents</h2>
+  <p class="dim">Limits live in a local daemon, outside the agent. An agent works with a token that can spend within the policy. It sees dataset names and never paths, and it has no call to raise a limit, lower a floor or change a label.</p>
+</section>
+</div>
+</div>
