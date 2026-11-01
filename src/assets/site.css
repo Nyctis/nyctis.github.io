@@ -59,6 +59,9 @@ code { font-size: .86em; color: var(--paper); overflow-wrap: anywhere; }
 .links a { color: var(--paper-2); text-decoration: none; padding: 4px 0; }
 .links a:hover { color: var(--paper); }
 .links a[aria-current] { color: var(--paper); box-shadow: 0 1px 0 var(--brass); }
+.ic { width: 16px; height: 16px; flex: none; fill: currentColor; }
+.gh { display: flex; padding: 4px; color: var(--paper-2); }
+.gh:hover { color: var(--paper); }
 
 /* ---- page grid ---- */
 .wrap { display: grid; grid-template-columns: minmax(0, var(--measure)) var(--margin); column-gap: 3rem; max-width: var(--page); margin-inline: auto; padding-inline: var(--gl) var(--gr); }
@@ -160,6 +163,14 @@ blockquote { margin: 0; padding-left: 1rem; border-left: 1px solid var(--brass);
 .steps span { font-size: .9375rem; color: var(--paper-2); }
 .can { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem; max-width: 44rem; }
 .can > div { display: grid; gap: .7rem; align-content: start; }
+/* The one place the visual spec allows a gradient: the screenshot fades into the page. */
+.dl { max-width: 64rem; margin-inline: auto; padding: .5rem var(--gr) 3.75rem var(--gl); min-width: 0; }
+.dl img { width: 100%; height: auto; display: block; border-radius: 4px; outline: 1px solid var(--line); outline-offset: -1px;
+  -webkit-mask-image: linear-gradient(to bottom, #000 42%, transparent 94%); mask-image: linear-gradient(to bottom, #000 42%, transparent 94%); }
+.dl-foot { position: relative; margin-top: clamp(-5rem, -6vw, -1.5rem); display: grid; justify-items: center; gap: .75rem; text-align: center; width: 100%; }
+.dl .dlbtns { margin-top: 0; justify-content: center; }
+.dlbtns a { display: inline-flex; align-items: center; justify-content: center; gap: .55rem; min-height: 44px; }
+.dl .dlbtns a.alt { background: var(--ink-0); }
 .band { display: grid; grid-template-columns: minmax(0, 20rem) minmax(0, 1fr); gap: 3.5rem; align-items: start; max-width: var(--page); margin-inline: auto; padding: 3.75rem var(--gr) 3.75rem var(--gl); border-top: 1px solid var(--line); }
 .side { display: grid; gap: .55rem; position: sticky; top: 1.5rem; }
 .side .dim { font-size: .9375rem; line-height: 1.5; }
@@ -301,6 +312,9 @@ blockquote { margin: 0; padding-left: 1rem; border-left: 1px solid var(--brass);
   .prices > div + div { padding-left: .65rem; }
   .top { gap: .7rem 1rem; }
   .links { order: 3; width: 100%; margin-left: 0; gap: 1.1rem; }
+  .gh { margin-left: auto; }
+  .dl .dlbtns { flex-direction: column; width: min(100%, 20rem); }
+  .dl .dlbtns a { width: 100%; }
   .stack > div { grid-template-columns: minmax(0, 1fr); gap: .2rem; }
   :root { --gl: max(16px, env(safe-area-inset-left, 0px)); --gr: max(16px, env(safe-area-inset-right, 0px)); }
 }
