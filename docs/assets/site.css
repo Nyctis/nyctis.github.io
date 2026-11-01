@@ -161,6 +161,7 @@ blockquote { margin: 0; padding-left: 1rem; border-left: 1px solid var(--brass);
 .steps li::before { content: counter(step); position: absolute; left: 0; top: .1rem; font: 400 .875rem/1.5 var(--mono); color: var(--brass); }
 .steps b { font-weight: 500; }
 .steps span { font-size: .9375rem; color: var(--paper-2); }
+.sect video { width: 100%; height: auto; display: block; background: var(--ink-0); outline: 1px solid var(--line); border-radius: 4px; }
 .can { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem; max-width: 44rem; }
 .can > div { display: grid; gap: .7rem; align-content: start; }
 /* The one place the visual spec allows a gradient: the screenshot fades into the page. */
