@@ -24,6 +24,8 @@ DECK_URL = ""
 MAC_URL = "https://github.com/Nyctis/beetle-desktop/releases/tag/v0.1.0"
 MAC_VERSION = "v0.1.0"
 ORG_URL = "https://github.com/Nyctis"
+DESKTOP_REPO = "https://github.com/Nyctis/beetle-desktop"
+CORE_REPO = "https://github.com/Nyctis/beetle-core"
 
 APPLE = ('<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014'
          '-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 '
@@ -101,7 +103,11 @@ def shot(name, root):
 
 def download_buttons():
     return (f'<div class="cta dlbtns"><a href="{MAC_URL}">{APPLE}Download for Mac</a>'
-            f'<a class="alt" href="{ORG_URL}">{GITHUB}GitHub</a></div>')
+            f'<a class="alt" href="{DESKTOP_REPO}">{GITHUB}GitHub for Beetle Desktop</a></div>')
+
+
+def core_button():
+    return f'<div class="cta dlbtns"><a href="{CORE_REPO}">{GITHUB}GitHub for Beetle Core</a></div>'
 
 
 def download_block(root):
@@ -134,6 +140,7 @@ def page_html(key, path, title, desc, body):
     body = re.sub(r"\{\{shot:(\w+)\}\}", lambda m: shot(m.group(1), root), body)
     body = body.replace("{{download}}", download_block(root) if MAC_URL else "")
     body = body.replace("{{dl-buttons}}", download_buttons() if MAC_URL else "")
+    body = body.replace("{{core-button}}", core_button())
     org = f'<a class="gh" href="{ORG_URL}" aria-label="Nyctis on GitHub">{GITHUB}</a>' if MAC_URL else ""
     dnav = ""
     if in_docs:
