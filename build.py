@@ -45,13 +45,6 @@ DOCS = [("components", "components/", "Components"), ("protocol", "protocol/", "
 # so arrows stay short. G puts a label in the gutter beside the window.
 G = 1216
 SHOTS = {
-    "market": ("market.png", "The market, with sellers ranked by price", [
-        (1162, 79, G, 79, "Training or inference"),
-        (1162, 157, G, 157, "Best price for its record"),
-        (1162, 268, G, 268, "Each offer against the median"),
-        (1162, 349, G, 349, "Model, price, record, slots"),
-        (634, 458, 668, 470, "Evidence decides the tier"),
-    ]),
     "models": ("models.png", "The Models page with adapters and base models", [
         (1162, 166, G, 166, "Roll back at any time"),
         (731, 220, 762, 246, "Score before and after"),

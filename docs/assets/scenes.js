@@ -43,13 +43,13 @@ window.SCENES = (function () {
       G('d', server(590, 66, 'GPU server')) + G('e', server(628, 206, 'GPU server')) +
       G('f', server(392, 262, 'GPU server')) + G('g', server(350, 150, 'Small GPU')) +
       G('a', laptop(118, 72, 'Mac')) + G('b', laptop(76, 246, 'Laptop')) +
-      chip('cg', 300, 406, 84, 'infer $1') + chip('cf', 400, 406, 84, 'infer $2') +
-      chip('cd', 512, 406, 92, 'train $20') + chip('ce', 628, 406, 92, 'train $30') +
+      chip('cg', 296, 406, 100, 'infer $0.25') + chip('cf', 404, 406, 100, 'infer $0.30') +
+      chip('cd', 520, 406, 108, 'train $0.50') + chip('ce', 640, 406, 108, 'train $0.60') +
       P('M118 118V386', { c: 'dash', k: 'read' }) +
       P('M164 70L546 66', { c: 'lnk', k: 'l1' }) + P('M122 246L350 262', { c: 'lnk', k: 'l2' }) +
       P('M122 232L308 158', { c: 'lnk', k: 'l3' }),
     p: { a: [164, 70], b: [122, 246], b2: [122, 232], d: [546, 66], dd: [590, 118], e: [628, 258], f: [392, 306], g: [340, 202],
-      f2: [350, 262], g2: [308, 158], m: [355, 68], ra: [118, 392], ta: [118, 118], cd: [512, 394], ce: [628, 394], cf: [400, 394], cg: [300, 394] },
+      f2: [350, 262], g2: [308, 158], m: [355, 68], ra: [118, 392], ta: [118, 118], cd: [520, 394], ce: [640, 394], cf: [404, 394], cg: [296, 394] },
     steps: [
       { say: 'GPU servers join the network.', on: ['d', 'e', 'f', 'g'] },
       { say: 'Each seller posts its price on Solana.', on: ['cd', 'ce', 'cf', 'cg'], fly: [['dd', 'cd'], ['e', 'ce', { d: 120 }], ['f', 'cf', { d: 240 }], ['g', 'cg', { d: 360 }]] },
@@ -71,7 +71,7 @@ window.SCENES = (function () {
     B(258, 70, 204, 162, { c: 'vault' }) + T(360, 96, 'Beetle program', { c: 'tl' }) +
     T(296, 142, 'Escrow', { c: 't' }) + '<text x="296" y="172" class="num" data-t="te" text-anchor="middle">$0.00</text>' +
     T(424, 142, 'Bond', { c: 't' }) + '<text x="424" y="172" class="num" data-t="to" text-anchor="middle">$0.00</text>' +
-    chip('of', 360, 206, 188, 'offer: train $20/M') + chip('ev', 360, 206, 188, 'evidence hash') + chip('kk', 360, 206, 188, 'sealed key') + chip('rs', 360, 206, 188, 'signed result') + chip('no', 360, 206, 188, 'start window missed') + chip('rf', 360, 206, 188, 'evidence refused') +
+    chip('of', 360, 206, 188, 'offer: train $0.50/M') + chip('ev', 360, 206, 188, 'evidence hash') + chip('kk', 360, 206, 188, 'sealed key') + chip('rs', 360, 206, 188, 'signed result') + chip('no', 360, 206, 188, 'start window missed') + chip('rf', 360, 206, 188, 'evidence refused') +
     P('M190 40H530', { c: 'lnk', k: 'p2p' }) + T(360, 30, 'direct link', { c: 't', k: 'p2pl' }) +
     P('M115 92V40H190M605 92V40H530', { c: 'lnk', k: 'p2pe' }) +
     rail(286, 720);
@@ -155,8 +155,8 @@ window.SCENES = (function () {
       { say: 'Set a budget. $0.50 goes into a payment channel.', text: { w: '$9.50', ch: '$0.50', tok: '0', e: '$0.000000' }, fly: [['wb', 'cb', { s: 'coin' }]] },
       { say: 'Tokens arrive. You sign a small voucher as they do.', on: ['stm', 'q'], text: { tok: '512' }, fly: [['s', 'b', { s: 'frame', n: 5 }], ['b', 's', { s: 'pale', n: 2, d: 500 }]], ms: 3400 },
       { say: 'Vouchers stay off chain, so the meter runs without fees.', text: { tok: '1,024' }, fly: [['s', 'b', { s: 'frame', n: 4 }], ['b', 's', { s: 'pale', n: 2, d: 500 }]], ms: 3000 },
-      { say: 'When you finish, the seller settles the last voucher.', off: ['q'], text: { e: '$0.000406', ch: '$0.499594' }, fly: [['cs', 'sb', { s: 'coin' }]] },
-      { say: 'The rest comes straight back.', text: { w: '$9.999594', ch: '$0.00' }, fly: [['cb', 'wb', { s: 'coin' }]], ms: 3400 }
+      { say: 'When you finish, the seller settles the last voucher.', off: ['q'], text: { e: '$0.000820', ch: '$0.499180' }, fly: [['cs', 'sb', { s: 'coin' }]] },
+      { say: 'The rest comes straight back.', text: { w: '$9.999180', ch: '$0.00' }, fly: [['cb', 'wb', { s: 'coin' }]], ms: 3400 }
     ]
   };
 
@@ -168,7 +168,7 @@ window.SCENES = (function () {
       G('m', server(150, 110, 'Your GPU server')) +
       chip('i0', 150, 34, 136, 'beetle host') +
       G('ck', T(290, 82, 'GPU  ready', { a: 'start', c: 'tg' }) + T(290, 106, 'Docker  ready', { a: 'start', c: 'tg' }) + T(290, 130, 'Sandbox  built', { a: 'start', c: 'tg' })) +
-      chip('of', 340, 294, 150, 'train $20/M') + chip('st', 170, 294, 110, 'stake') +
+      chip('of', 340, 294, 150, 'train $0.50/M') + chip('st', 170, 294, 110, 'stake') +
       G('b', laptop(590, 96, 'Buyer')) + P('M192 110L546 96', { c: 'lnk', k: 'ln' }) +
       G('earn', T(150, 218, 'earned', {}) + '<text x="150" y="244" class="num" data-t="er" text-anchor="middle">$0.00</text>'),
     p: { m: [150, 150], st: [170, 282], of: [340, 282], s: [192, 110], b: [546, 96], v: [340, 282], e: [150, 196] },
