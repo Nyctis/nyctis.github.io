@@ -1,0 +1,66 @@
+<!-- How it works | Buyers and sellers meet on Solana, then connect directly. The chain handles money. Everything else stays between the two machines. -->
+<div class="page">
+  <header class="phead">
+    <h1>How Beetle works</h1>
+    <p class="lede">Buyers and sellers meet on Solana, then connect directly. The chain handles money. Everything else stays between the two machines.</p>
+  </header>
+</div>
+<section class="band">
+  <div class="side">
+    <h2>Money waits on chain</h2>
+    <p class="dim">The buyer's payment goes into escrow and the seller locks a bond. The Beetle program pays out on facts it can check.</p>
+  </div>
+  <figure class="scene" data-scene="market"></figure>
+</section>
+<section class="band">
+  <div class="side">
+    <h2>The chain holds only what it must</h2>
+    <p class="dim">Money and commitments go on chain. Addresses and keys go on it only in sealed form.</p>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>On chain</th><th>Never on chain</th></tr></thead>
+    <tbody>
+      <tr><td>Offers and prices</td><td>Your data</td></tr>
+      <tr><td>Escrow and bonds</td><td>Model weights</td></tr>
+      <tr><td>Sealed addresses</td><td>Scores and logs</td></tr>
+      <tr><td>Sealed data key</td><td>Prompts and tokens</td></tr>
+      <tr><td>Result hash</td><td>Hardware evidence</td></tr>
+    </tbody>
+  </table></div>
+</section>
+<section class="band">
+  <div class="side">
+    <h2>A job is a short recipe</h2>
+    <p class="dim">Say what the model should learn, which base model to use, how long to train and what counts as a pass. The recipe travels sealed, with your data.</p>
+  </div>
+  <pre class="term">{
+  "method": "memory",
+  "base": "qwen3.5-2b",
+  "lora": { "rank": 16, "alpha": 32 },
+  "optim": { "lr": 0.002, "epochs": 4 },
+  "acceptance": { "min_gain": 0.5 }
+}</pre>
+</section>
+<section class="band">
+  <div class="side">
+    <h2>Jobs run in a sandbox with no network</h2>
+    <p class="dim">It measures a baseline, trains, then scores the result on a test the training never saw. The adapter and scores come back sealed.</p>
+  </div>
+  <figure class="scene" data-scene="job"></figure>
+</section>
+<section class="band">
+  <div class="side">
+    <h2>You set the floor</h2>
+    <p class="dim">Evidence decides a seller's tier. Your key goes only to a seller that meets your floor.</p>
+  </div>
+  <div class="stackv">
+    <div class="tbl"><table>
+      <thead><tr><th>Tier</th><th>Machine</th><th>Who can read a job</th><th>Suitable data</th></tr></thead>
+      <tbody>
+        <tr><td class="m">T0</td><td>Your own machine</td><td>Only you</td><td>Any</td></tr>
+        <tr><td class="m">T3-C</td><td>Ordinary GPU server</td><td>You and the machine's owner</td><td>Public or synthetic</td></tr>
+      </tbody>
+    </table></div>
+    <p class="cap"><a href="{{base}}privacy/">How privacy works</a> · <a href="{{base}}protocol/">Protocol details</a></p>
+  </div>
+</section>

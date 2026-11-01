@@ -24,7 +24,7 @@
 
   function Player(host, def) {
     var tabs = def.tabs || [{ steps: def.steps }];
-    var tab = 0, step = -1, timer = 0, playing = !still, visible = false, runs = [], locked = false;
+    var tab = 0, step = -1, timer = 0, playing = !still, visible = false, runs = [];
 
     host.innerHTML =
       (def.tabs ? '<div class="sc-tabs" role="tablist"></div>' : '') +
@@ -47,9 +47,6 @@
       var steps = tabs[tab].steps;
       keyed.forEach(function (e) { e.classList.remove('on', 'hot'); });
       texts.forEach(function (t) { t.textContent = first[t.dataset.t]; });
-      svg.querySelectorAll('[data-col]').forEach(function (c) {
-        c.classList.toggle('dim', (tabs[tab].dim || []).indexOf(c.dataset.col) >= 0 && i >= 2);
-      });
       for (var j = 0; j <= i; j++) {
         var s = steps[j];
         (s.on || []).forEach(function (k) { keyEl(k).forEach(function (e) { e.classList.add('on'); }); });
@@ -137,8 +134,7 @@
     function next() {
       var steps = tabs[tab].steps;
       if (step < steps.length - 1) return show(step + 1);
-      if (tabs.length > 1 && !locked) return setTab((tab + 1) % tabs.length);
-      show(0);
+      setPlaying(false);
     }
 
     function setTab(t) {
@@ -156,16 +152,17 @@
       if (on && visible) timer = setTimeout(next, 600);
     }
 
-    play.addEventListener('click', function () { setPlaying(!playing); });
+    play.addEventListener('click', function () {
+      var atEnd = step === tabs[tab].steps.length - 1;
+      setPlaying(!playing);
+      if (playing && atEnd) show(0);
+    });
 
     if (def.tabs) {
       var bar = host.querySelector('.sc-tabs');
-      bar.innerHTML = tabs.map(function (t) {
-        return (t.group ? '<span class="sc-group">' + t.group + '</span>' : '') +
-          '<button type="button" role="tab">' + t.name + '</button>';
-      }).join('');
+      bar.innerHTML = tabs.map(function (t) { return '<button type="button" role="tab">' + t.name + '</button>'; }).join('');
       bar.querySelectorAll('button').forEach(function (b, i) {
-        b.addEventListener('click', function () { locked = true; setTab(i); });
+        b.addEventListener('click', function () { setPlaying(!still); setTab(i); });
       });
     }
 
@@ -185,32 +182,6 @@
   document.querySelectorAll('.scene[data-scene]').forEach(function (el) {
     Player(el, SCENES[el.dataset.scene]);
   });
-
-  // Terminal: types itself once it scrolls into view.
-  var term = document.querySelector('.term[data-type]');
-  if (term && !still && 'IntersectionObserver' in window) {
-    var lines = Array.prototype.slice.call(term.querySelectorAll('.ln'));
-    lines.forEach(function (l) { l.style.visibility = 'hidden'; });
-    var seen = new IntersectionObserver(function (list) {
-      if (!list[0].isIntersecting) return;
-      seen.disconnect();
-      var i = 0;
-      (function step() {
-        if (i >= lines.length) return;
-        var line = lines[i++];
-        line.style.visibility = 'visible';
-        var cmd = line.querySelector('.cmd');
-        if (!cmd) return setTimeout(step, 420);
-        var text = cmd.textContent, n = 0;
-        cmd.textContent = '';
-        (function type() {
-          cmd.textContent = text.slice(0, ++n);
-          if (n < text.length) setTimeout(type, 16); else setTimeout(step, 260);
-        })();
-      })();
-    }, { threshold: .4 });
-    seen.observe(term);
-  }
 
   // Side index: brass marks the section being read.
   var links = document.querySelectorAll('.toc a');

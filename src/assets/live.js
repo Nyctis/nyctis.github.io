@@ -1,25 +1,18 @@
 /* The hero: a small simulation of the network, always running. Machines list on
    the chain, buyers take offers, pairs dial each other, sealed frames flow over
-   the direct link and the job settles on chain. Instruction names are real. */
+   the direct link and the job settles on chain. */
 (function () {
   var canvas = document.getElementById('live');
   if (!canvas) return;
   var ctx = canvas.getContext('2d');
   var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var INK = '#0B0D12', PAPER = '#F4F2EA', P2 = '#A6AAB0', P3 = '#7C8289', LINE = '#262B32', BRASS = '#B4A27A';
-  var W = 0, H = 0, railY = 0, nodes = [], jobs = [], marks = [], notes = [], blocks = [];
+  var W = 0, H = 0, railY = 0, nodes = [], jobs = [], marks = [], blocks = [];
   var clock = 0, lastFrame = 0, nextBlock = 0, nextJob = 0, onScreen = true;
 
   function rnd(a, b) { return a + Math.random() * (b - a); }
   function pick(list) { return list[Math.floor(Math.random() * list.length)]; }
   function ease(t) { return t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
-
-  function keepOut() {
-    var lead = canvas.parentElement.querySelector('.lead');
-    if (!lead || getComputedStyle(canvas).position !== 'absolute') return null;
-    var a = lead.getBoundingClientRect(), b = canvas.getBoundingClientRect();
-    return { x0: a.left - b.left - 30, x1: a.right - b.left + 50, y0: a.top - b.top - 30, y1: a.bottom - b.top + 30 };
-  }
 
   function layout() {
     var d = Math.min(devicePixelRatio || 1, 2), box = canvas.getBoundingClientRect();
@@ -27,12 +20,11 @@
     canvas.width = W * d; canvas.height = H * d;
     ctx.setTransform(d, 0, 0, d, 0, 0);
     railY = H - 62;
-    var out = keepOut(), stepX = W < 700 ? 84 : 118, stepY = W < 700 ? 74 : 92;
-    nodes = []; jobs = []; marks = []; notes = [];
+    var stepX = W < 420 ? 84 : 118, stepY = W < 420 ? 74 : 92;
+    nodes = []; jobs = []; marks = [];
     for (var y = 44; y < railY - 60; y += stepY) {
       for (var x = 40 + (Math.floor(y / stepY) % 2) * stepX / 2; x < W - 34; x += stepX) {
         var nx = x + rnd(-18, 18), ny = y + rnd(-14, 14);
-        if (out && nx > out.x0 && nx < out.x1 && ny > out.y0 && ny < out.y1) continue;
         if (Math.random() < .2) continue;
         nodes.push({ x: nx, y: ny, kind: Math.random() < .55 ? 'server' : 'mac', busy: false, born: rnd(0, 1800), glow: 0, listed: false });
       }
@@ -46,8 +38,8 @@
     if (still) { for (var i = 0; i < 4; i++) startJob(true); }
   }
 
-  function fly(x0, y0, x1, y1, shape, dur, done, label) {
-    marks.push({ x0: x0, y0: y0, x1: x1, y1: y1, at: clock, dur: dur, shape: shape, done: done, label: label });
+  function fly(x0, y0, x1, y1, shape, dur, done) {
+    marks.push({ x0: x0, y0: y0, x1: x1, y1: y1, at: clock, dur: dur, shape: shape, done: done });
   }
 
   function curve(j, t) {
@@ -75,26 +67,26 @@
     var age = clock - j.at;
     if (j.phase === 0) {            // the buyer escrows, then both post sealed addresses
       j.phase = 1;
-      fly(j.b.x, j.b.y + 14, j.b.x, railY, 'coin', 1000, null, 'open_job');
+      fly(j.b.x, j.b.y + 14, j.b.x, railY, 'coin', 1000);
       j.s.glow = clock;
     } else if (j.phase === 1 && age > 1100) {
       j.phase = 2;
-      fly(j.b.x, j.b.y + 14, j.b.x, railY, 'seal', 900, null, 'rdv_open');
-      fly(j.s.x, j.s.y + 14, j.s.x, railY, 'seal', 900, null, 'rdv_answer');
+      fly(j.b.x, j.b.y + 14, j.b.x, railY, 'seal', 900);
+      fly(j.s.x, j.s.y + 14, j.s.x, railY, 'seal', 900);
     } else if (j.phase === 2 && age > 2200) {      // both dial at once, from either end
       var f = Math.min(1, (age - 2200) / 900);
       j.reach = ease(f);
       if (f >= 1) {
         j.phase = 3;
-        fly(j.b.x, j.b.y + 14, j.b.x, railY, 'key', 900, null, 'release_key');
+        fly(j.b.x, j.b.y + 14, j.b.x, railY, 'key', 900);
       }
     } else if (j.phase === 3) {
       if (Math.random() < .09) j.frames.push({ t: 0, way: Math.random() < .55 ? 1 : -1 });
       if (clock > j.until) {
         j.phase = 4; j.closed = clock;
         fly(j.s.x, j.s.y + 14, j.s.x, railY, 'seal', 900, function () {
-          fly(j.s.x, railY, j.s.x, j.s.y + 14, 'coin', 900, null, 'claim');
-        }, 'submit_result');
+          fly(j.s.x, railY, j.s.x, j.s.y + 14, 'coin', 900);
+        });
       }
     } else if (j.phase === 4) {
       j.fade = Math.max(0, 1 - (clock - j.closed) / 1800);
@@ -162,25 +154,17 @@
       ctx.globalAlpha = 1;
       ctx.strokeStyle = hit ? BRASS : LINE; ctx.strokeRect(b.x, railY - 4, 18, 18);
     });
-    ctx.fillStyle = INK; ctx.fillRect(0, railY - 13, 88, 38);
-    ctx.fillStyle = P2; ctx.font = '500 12px "IBM Plex Sans", sans-serif'; ctx.textAlign = 'left';
-    ctx.fillText('Solana', 24, railY + 9);
-
     marks.forEach(function (m) {
       var p = Math.min(1, (clock - m.at) / m.dur), e = ease(p);
       shape(m.shape, m.x0 + (m.x1 - m.x0) * e, m.y0 + (m.y1 - m.y0) * e);
     });
 
+    ctx.fillStyle = INK; ctx.fillRect(0, railY - 13, 88, 38);
+    ctx.fillStyle = P2; ctx.font = '500 12px "IBM Plex Sans", sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText('Solana', 24, railY + 9);
+
     ctx.font = '400 11px "IBM Plex Mono", monospace';
     ctx.fillStyle = P3; ctx.textAlign = 'right'; ctx.fillText('Illustration', W - 24, railY + 44);
-    ctx.textAlign = 'center';
-    notes.forEach(function (n) {
-      var a = 1 - (clock - n.at) / 2200;
-      if (a <= 0) return;
-      ctx.globalAlpha = Math.min(1, a * 1.6); ctx.fillStyle = P2;
-      ctx.fillText(n.text, n.x, n.y - (1 - a) * 8);
-      ctx.globalAlpha = 1;
-    });
   }
 
   function advance(dt) {
@@ -197,13 +181,9 @@
         var near = blocks.reduce(function (p, b) { return Math.abs(b.x + 9 - m.x1) < Math.abs(p.x + 9 - m.x1) ? b : p; }, blocks[0]);
         near.hit = clock;
       }
-      if (m.label && !notes.some(function (n) { return Math.abs(n.x - m.x1) < 110; })) {
-        notes.push({ text: m.label, x: Math.min(W - 60, Math.max(60, m.x1)), y: railY - 22, at: clock });
-      }
       if (m.done) m.done();
       return false;
     });
-    notes = notes.filter(function (n) { return clock - n.at < 2200; });
   }
 
   function tick(now) {

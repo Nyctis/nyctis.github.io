@@ -61,34 +61,6 @@ window.SCENES = (function () {
     ]
   };
 
-  var routeSvg =
-    G('you', laptop(120, 138, 'Your machine')) +
-    G('s1', server(590, 62, 'Training seller')) +
-    G('s2', server(590, 214, 'Inference seller')) +
-    P('M168 126L544 66', { c: 'lnk', k: 'l1' }) + P('M168 150L544 210', { c: 'lnk', k: 'l2' }) +
-    chip('ad', 120, 216, 92, 'adapter') + chip('lc', 120, 252, 150, 'runs here · $0') + chip('rm', 590, 288, 150, 'paid per token');
-  var route = {
-    box: [720, 310],
-    label: 'A machine that can run a model trains remotely and runs at home. A machine that cannot sends both jobs to sellers.',
-    svg: routeSvg,
-    p: { y: [168, 126], y2: [168, 150], s1: [544, 66], s2: [544, 210], h: [120, 196] },
-    tabs: [
-      { name: 'Can run the model', steps: [
-        { say: 'Your machine runs the model, but cannot train it.', on: ['you'] },
-        { say: 'Training goes to a GPU seller.', on: ['s1', 'l1'], fly: [['y', 's1', { s: 'seal' }]] },
-        { say: 'The adapter comes home, sealed.', on: ['ad'], fly: [['s1', 'y', { s: 'seal' }]] },
-        { say: 'The same model name now answers locally, for free.', on: ['lc'], off: ['l1'], ms: 3000 }
-      ] },
-      { name: 'Cannot run it', steps: [
-        { say: 'Your machine cannot run the model.', on: ['you'] },
-        { say: 'Training goes to a GPU seller.', on: ['s1', 'l1'], fly: [['y', 's1', { s: 'seal' }]] },
-        { say: 'The adapter comes back, sealed.', on: ['ad'], fly: [['s1', 'y', { s: 'seal' }]] },
-        { say: 'You seal it again for an inference seller.', on: ['s2', 'l2'], off: ['l1'], fly: [['y2', 's2', { s: 'seal' }]] },
-        { say: 'Same model name, same API. Paid per token.', on: ['rm'], fly: [['y2', 's2', { s: 'frame', n: 4 }], ['s2', 'y2', { s: 'frame', n: 4, d: 180 }]], ms: 3400 }
-      ] }
-    ]
-  };
-
   function book(buyer, esc, bond, seller) {
     return { tb: buyer, te: esc, to: bond, ts: seller };
   }
@@ -167,36 +139,6 @@ window.SCENES = (function () {
     ]
   };
 
-  var cols = [['T0', 'Your machine', 'c0', 'only you'], ['T3-C', 'Ordinary GPU', 'c1', 'owner can read']];
-  var tierSvg = T(360, 30, 'Your key', { c: 'tl' }) + B(322, 42, 76, 36, { c: 'tile' }) + P('M348 60a6 6 0 1 1 12 0a6 6 0 1 1 -12 0M360 60h14M370 60v6', { c: 'gold' });
-  cols.forEach(function (c, i) {
-    var x = 190 + i * 340;
-    tierSvg += '<g data-col="' + c[2] + '">' + B(x - 74, 150, 148, 96, { c: 'tile' }) + T(x, 182, c[0], { c: 'num2' }) + T(x, 208, c[1]) +
-      T(x, 230, c[3], { c: 'ts' }) + '</g>';
-  });
-  tierSvg += G('c1o', P('M464 240H596', { c: 'gold' })) + G('c1x', T(530, 270, 'no key', { c: 'tb' })) + G('c1y', T(530, 270, 'key released', { c: 'tg' })) +
-    P('M360 78V112H530V150', { c: 'dash', k: 'c1l' });
-  var tp = { k: [360, 78], c1: [530, 150] };
-  // The key goes to a T3-C seller, or it stays home.
-  function floorTab(name, pass, say, end) {
-    return { name: name, dim: pass ? [] : ['c1'], steps: [
-      { say: say, on: ['c1l'] },
-      { say: 'Evidence decides the tier. No evidence means T3-C.', on: ['c1o'], ms: 2200 },
-      pass ? { say: 'Only sellers at your floor or above can get the key.', off: ['c1o'], on: ['c1y'], fly: [['k', 'c1', { s: 'key', t: 1000 }]], ms: 3400 }
-        : { say: end, off: ['c1o', 'c1l'], on: ['c1x'], ms: 3400 }
-    ] };
-  }
-  var tiers = {
-    box: [720, 290],
-    label: 'A buyer sets a privacy floor. The key goes only to sellers that meet it.',
-    svg: tierSvg,
-    p: tp,
-    tabs: [
-      floorTab('Floor: public', true, 'Public or synthetic data can go to any seller.'),
-      floorTab('Floor: personal', false, 'Personal data has a higher floor.', 'T3-C does not meet it, so the key stays on your machine.')
-    ]
-  };
-
   var pay = {
     box: [720, 340],
     label: 'A buyer deposits a budget, signs vouchers off chain as tokens arrive, and gets the unused balance back.',
@@ -215,53 +157,6 @@ window.SCENES = (function () {
       { say: 'Vouchers stay off chain, so the meter runs without fees.', text: { tok: '1,024' }, fly: [['s', 'b', { s: 'frame', n: 4 }], ['b', 's', { s: 'pale', n: 2, d: 500 }]], ms: 3000 },
       { say: 'When you finish, the seller settles the last voucher.', off: ['q'], text: { e: '$0.000406', ch: '$0.499594' }, fly: [['cs', 'sb', { s: 'coin' }]] },
       { say: 'The rest comes straight back.', text: { w: '$9.999594', ch: '$0.00' }, fly: [['cb', 'wb', { s: 'coin' }]], ms: 3400 }
-    ]
-  };
-
-  // A recipe is a few plain settings. The JSON on the right fills in as they are chosen.
-  function blk(k, y, a, b) {
-    return G(k, B(30, y, 230, 42, { c: 'tile' }) + T(44, y + 26, a, { c: 'tl', a: 'start' }) + T(246, y + 26, b, { a: 'end' }));
-  }
-  var recipeSvg =
-    T(30, 26, 'Choose', { c: 'tl', a: 'start' }) +
-    blk('r1', 40, 'Method', 'memory') + blk('r2', 92, 'Base model', 'qwen3.5-2b') + blk('r3', 144, 'LoRA', 'rank 16') +
-    blk('r4', 196, 'Training', '4 epochs') + blk('r5', 248, 'Acceptance', 'hidden test') +
-    B(330, 40, 360, 250, { c: 'vault' }) + T(346, 66, 'Recipe', { c: 'tl', a: 'start' }) +
-    T(346, 104, '"method": "memory"', { a: 'start', k: 'j1' }) + T(346, 132, '"base": "qwen3.5-2b"', { a: 'start', k: 'j2' }) +
-    T(346, 160, '"lora": { "rank": 16, "alpha": 32 }', { a: 'start', k: 'j3' }) +
-    T(346, 188, '"optim": { "lr": 0.002, "epochs": 4 }', { a: 'start', k: 'j4' }) +
-    T(346, 216, '"acceptance": { "min_gain": 0.5 }', { a: 'start', k: 'j5' }) +
-    G('rs', lock(660, 62) + T(346, 262, 'sealed with your data', { c: 'tg', a: 'start' }));
-  var recipe = {
-    box: [720, 310],
-    label: 'A recipe is a short list of settings.',
-    svg: recipeSvg,
-    p: { a: [260, 61], b: [260, 113], c: [260, 165], d: [260, 217], e: [260, 269], j: [346, 150] },
-    steps: [
-    { say: 'Pick what the model should learn.', on: ['r1', 'j1'], hot: ['r1'], fly: [['a', 'j', { s: 'pale' }]], ms: 1900 },
-    { say: 'Pick a base model. The sandbox checks its hash.', on: ['r2', 'j2'], fly: [['b', 'j', { s: 'pale' }]], ms: 1900 },
-    { say: 'Set how the adapter is built.', on: ['r3', 'j3'], fly: [['c', 'j', { s: 'pale' }]], ms: 1900 },
-    { say: 'Set how long it trains.', on: ['r4', 'j4'], fly: [['d', 'j', { s: 'pale' }]], ms: 1900 },
-    { say: 'Decide what counts as a pass.', on: ['r5', 'j5'], fly: [['e', 'j', { s: 'pale' }]], ms: 1900 },
-    { say: 'The recipe travels sealed, with your data.', on: ['rs'], ms: 3000 }
-    ]
-  };
-
-  // What the chain keeps and what never reaches it.
-  function bin(k, x, y, s, good) { return G(k, B(x, y, 200, 34, { c: good ? 'tile' : 'off' }) + T(x + 100, y + 22, s, { c: good ? 'tc' : 't' })); }
-  var chain = {
-    box: [720, 300],
-    label: 'Escrow, bonds, offers, sealed keys and result hashes go on chain. Data, weights, scores and tokens never do.',
-    svg: T(170, 26, 'On chain', { c: 'tl' }) + T(550, 26, 'Never on chain', { c: 'tl' }) + P('M360 14V286', { c: 'dash' }) +
-      bin('o1', 70, 44, 'Offers and prices', 1) + bin('o2', 70, 90, 'Escrow and bonds', 1) + bin('o3', 70, 136, 'Sealed addresses', 1) + bin('o4', 70, 182, 'Sealed data key', 1) + bin('o5', 70, 228, 'Result hash', 1) +
-      bin('x1', 450, 44, 'Your data', 0) + bin('x2', 450, 90, 'Model weights', 0) + bin('x3', 450, 136, 'Scores and logs', 0) + bin('x4', 450, 182, 'Prompts and tokens', 0) + bin('x5', 450, 228, 'Hardware evidence', 0),
-    p: {},
-    steps: [
-      { say: 'The chain holds money and commitments.', on: ['o1', 'o2'] },
-      { say: 'Addresses and keys go on it only in sealed form.', on: ['o3', 'o4'] },
-      { say: 'A result leaves just a hash.', on: ['o5'] },
-      { say: 'Your data, weights and scores never touch it.', on: ['x1', 'x2', 'x3'] },
-      { say: 'Prompts stay between the two machines. Evidence is checked on yours.', on: ['x4', 'x5'], ms: 3400 }
     ]
   };
 
@@ -287,40 +182,5 @@ window.SCENES = (function () {
     ]
   };
 
-  // One picture, many uses: the same machines, a different path through them.
-  var uses = {
-    box: [720, 376],
-    label: 'One network, many uses: use a bigger model, train and keep the result, sell a GPU.',
-    svg: rail(326, 720) +
-      '<g class="idle">' + server(600, 52, 'GPU seller') + server(600, 256, 'GPU seller') + '</g>' +
-      G('you', laptop(120, 150, 'Your Mac', 'un')) + G('s', server(600, 146, 'GPU seller', 'sn')) +
-      P('M158 146H558', { c: 'lnk', k: 'l' }) +
-      chip('big', 120, 92, 176, 'too big for this Mac') + chip('pub', 120, 92, 176, 'public or synthetic') +
-      chip('ad', 120, 226, 92, 'adapter') + chip('lc', 120, 262, 150, 'runs here · $0') +
-      chip('of', 430, 346, 134, 'infer $1 / $3') + chip('tr', 430, 346, 134, 'train $20/M') + chip('mine', 430, 346, 134, 'your price') +
-      chip('tk', 356, 186, 130, 'paid per token') + chip('ern', 356, 186, 130, 'paid in USDC'),
-    p: { y: [158, 146], s: [558, 146], sd: [560, 170], of: [430, 334] },
-    tabs: [
-      { name: 'Use a bigger model', group: 'Running on devnet', steps: [
-        { say: 'This model is too big for your Mac.', on: ['you', 'big'] },
-        { say: 'A GPU seller lists it, priced per token.', on: ['s', 'of'], fly: [['sd', 'of', { s: 'pale' }]] },
-        { say: 'Your Mac connects to it directly.', on: ['l'], fly: [['y', 's', { s: 'seal' }]] },
-        { say: 'Tokens come back as you pay for them.', on: ['tk'], fly: [['s', 'y', { s: 'frame', n: 4 }], ['y', 's', { s: 'pale', n: 2, d: 500 }]], ms: 3400 }
-      ] },
-      { name: 'Train and keep it', steps: [
-        { say: 'Public or synthetic data, sealed on your Mac.', on: ['you', 'pub'] },
-        { say: 'A GPU seller trains on it.', on: ['s', 'l', 'tr'], fly: [['y', 's', { s: 'seal' }]] },
-        { say: 'The adapter comes home, sealed.', on: ['ad'], fly: [['s', 'y', { s: 'seal' }]] },
-        { say: 'It now runs on your Mac, under the same model name, for $0.', on: ['lc'], off: ['l'], ms: 3000 }
-      ] },
-      { name: 'Sell your GPU', steps: [
-        { say: 'Your GPU server joins the network.', on: ['s'], text: { sn: 'Your GPU server', un: 'A buyer' } },
-        { say: 'Stake, then post your price on chain.', on: ['mine'], fly: [['sd', 'of', { s: 'coin' }]] },
-        { say: 'A buyer connects directly.', on: ['you', 'l'], fly: [['y', 's', { s: 'seal' }]] },
-        { say: 'You run the job, then collect on chain.', on: ['ern'], fly: [['s', 'y', { s: 'frame', n: 3 }], ['of', 'sd', { s: 'coin', d: 700 }]], ms: 3400 }
-      ] }
-    ]
-  };
-
-  return { uses: uses, net: net, route: route, market: market, chain: chain, recipe: recipe, job: job, tiers: tiers, pay: pay, host: host };
+  return { net: net, market: market, job: job, pay: pay, host: host };
 })();

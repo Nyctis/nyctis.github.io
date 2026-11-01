@@ -30,8 +30,8 @@
 
 <section class="block" id="client">
   <h2>Client</h2>
-  <figure class="scene" data-scene="route"></figure>
   <p class="dim">Everything on the buyer's machine runs inside one local daemon. The CLI, SDK and MCP tools are its clients, so an agent never holds the wallet.</p>
+  <p class="dim">Doctor measures this machine first. If it can run the model, training goes to a seller and the adapter runs here. If it cannot, a second seller runs the adapter under the same model name.</p>
   <div class="tbl"><table>
     <thead><tr><th>Component</th><th>What it does</th><th>Code</th></tr></thead>
     <tbody>
@@ -68,7 +68,6 @@
 
 <section class="block" id="environment">
   <h2>Environment</h2>
-  <figure class="scene" data-scene="job"></figure>
   <p class="dim">The workload container has no network interface. Only ciphertext and public model files go in or come out. What the machine's owner can read depends on the tier, and the evidence decides the tier.</p>
   <div class="tbl"><table>
     <thead><tr><th>Component</th><th>What it does</th><th>Code</th></tr></thead>

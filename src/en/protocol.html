@@ -21,7 +21,6 @@
 
 <section class="block" id="job">
   <h2>One training job</h2>
-  <figure class="scene" data-scene="market"></figure>
   <div class="tbl"><table>
     <thead><tr><th>#</th><th>Step</th><th>What happens</th><th>On chain</th></tr></thead>
     <tbody>
@@ -131,7 +130,6 @@
 
 <section class="block" id="infer">
   <h2>Paying for inference</h2>
-  <figure class="scene" data-scene="pay"></figure>
   <p class="dim">Inference does not touch the Beetle program. The buyer opens a Solana Foundation payment channel with a one-time session key and deposits a budget. Cumulative vouchers are signed in small steps off chain. At the end the seller settles with the last voucher and the balance returns to the buyer.</p>
   <ul class="plain dim">
     <li>A buyer can overpay by at most one step plus the current input. A seller can work unpaid for at most one step.</li>
@@ -143,7 +141,6 @@
 
 <section class="block" id="meet">
   <h2>How two machines find each other</h2>
-  <figure class="scene" data-scene="net"></figure>
   <p class="dim">A contract cannot send packets, so the chain replaces a coordination server and nothing more. Each side writes its candidate addresses, sealed to the other, then both dial at the same moment. Addresses stay sealed on chain, so only the two parties can read them.</p>
   <p class="dim">With relays off, the two machines connect directly. If a link cannot form, Beetle moves to the next seller, up to three, and never goes below your floor.</p>
 </section>

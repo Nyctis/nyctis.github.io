@@ -22,6 +22,7 @@ DECK_URL = ""
 
 PAGES = [
     ("index", ""),
+    ("how-it-works", "how-it-works/"),
     ("mac", "mac/"),
     ("server", "server/"),
     ("pricing", "pricing/"),
@@ -33,10 +34,10 @@ PAGES = [
     ("colophon", "colophon/"),
 ]
 
-NAV = [("#uses", "Uses"), ("#network", "Network"), ("#market", "Market"), ("#chain", "Chain"), ("#recipe", "Recipe"), ("#tiers", "Tiers"), ("pricing/", "Pricing")]
-DOC_KEYS = {"components", "protocol", "privacy", "mac", "server", "notes", "notes-chain"}
+NAV = [("how-it-works/", "How it works"), ("mac/", "Desktop"), ("server/", "Server"), ("pricing/", "Pricing")]
+DOC_KEYS = {"components", "protocol", "privacy", "notes", "notes-chain"}
 DOCS = [("components", "components/", "Components"), ("protocol", "protocol/", "Protocol"), ("privacy", "privacy/", "Privacy"),
-        ("server", "server/", "Server"), ("mac", "mac/", "Desktop tour"), ("notes", "notes/", "Notes")]
+        ("notes", "notes/", "Notes")]
 
 
 # Notes on the screenshots, in the window's own 1200 x 780 coordinates.
