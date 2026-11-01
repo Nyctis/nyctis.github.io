@@ -50,7 +50,7 @@ PAGES = [
     ("colophon", "colophon/"),
 ]
 
-NAV = [("how-it-works/", "How it works"), ("mac/", "Desktop"), ("server/", "Server"), ("pricing/", "Pricing")]
+NAV = [("", "Home"), ("how-it-works/", "How it works"), ("mac/", "Desktop"), ("server/", "Server"), ("pricing/", "Pricing")]
 DOC_KEYS = {"components", "protocol", "privacy", "notes", "notes-chain"}
 DOCS = [("components", "components/", "Components"), ("protocol", "protocol/", "Protocol"), ("privacy", "privacy/", "Privacy"),
         ("notes", "notes/", "Notes")]
@@ -58,7 +58,8 @@ DOCS = [("components", "components/", "Components"), ("protocol", "protocol/", "
 
 # Notes on the screenshots, in the window's own 1200 x 780 coordinates.
 # (target x, target y, label x, label y, text). Labels sit next to what they point at,
-# so arrows stay short. G puts a label in the gutter beside the window.
+# so arrows stay short. G puts a label in the gutter beside the window. A fourth
+# value gives the height of a cropped screenshot.
 G = 1216
 SHOTS = {
     "models": ("models.png", "The Models page with adapters and base models", [
@@ -67,34 +68,34 @@ SHOTS = {
         (1162, 375, G, 375, "Who sells each model"),
         (500, 430, 530, 458, "What runs on this Mac"),
     ]),
-    "network": ("network.png", "Direct links to three sellers, with Solana underneath", [
-        (1162, 228, G, 228, "Machine and models"),
-        (600, 264, 628, 312, "Direct, no relay"),
-        (1162, 346, G, 346, "Money and commitments"),
-        (1162, 460, G, 460, "Live from the chain"),
-        (1162, 657, G, 657, "Public record"),
-    ]),
+    "network": ("desktop.png", "Direct links to three sellers, with Solana underneath", [
+        (1142, 164, G, 164, "Machine and models"),
+        (600, 227, 628, 262, "Direct, no relay"),
+        (1142, 342, G, 342, "Money and commitments"),
+        (1143, 456, G, 456, "Live from the chain"),
+    ], 510),
     "connect": ("connect.png", "The Connect page for agents and developers", [
         (1050, 178, 1092, 178, "One click"),
         (1050, 356, 1092, 356, "Hard limits"),
-        (715, 564, 768, 564, "OpenAI-compatible address"),
+        (722, 616, 768, 616, "OpenAI-compatible address"),
     ]),
 }
 
 
 def shot(name, root):
-    src, alt, notes = SHOTS[name]
+    src, alt, notes, *crop = SHOTS[name]
+    h = crop[0] if crop else 780
     lines, pins, chips, items = "", "", "", ""
     for n, (tx, ty, lx, ly, text) in enumerate(notes, 1):
         path = f"M{lx} {ly}H{tx}" + (f"V{ty}" if ty != ly else "")
         lines += f'<path class="leader" marker-end="url(#ah-{name})" d="{path}"/>'
         pins += f'<g class="pin"><circle cx="{tx}" cy="{ty}" r="14"/><text x="{tx}" y="{ty + 5}" text-anchor="middle">{n}</text></g>'
-        chips += f'<span class="note" style="left:{lx / 12:.2f}%;top:{ly / 7.8:.2f}%">{text}</span>'
+        chips += f'<span class="note" style="left:{lx / 12:.2f}%;top:{ly * 100 / h:.2f}%">{text}</span>'
         items += f"<li>{text}</li>"
     head = (f'<defs><marker id="ah-{name}" viewBox="0 0 8 8" refX="7.5" refY="4" markerWidth="8" markerHeight="8" '
             f'markerUnits="userSpaceOnUse" orient="auto"><path d="M0 .5L8 4L0 7.5z"/></marker></defs>')
-    return (f'<figure class="anno"><div class="anno-img"><img src="{root}assets/shots/{src}" alt="{alt}" width="2400" height="1560" loading="lazy">'
-            f'<svg viewBox="0 0 1200 780" aria-hidden="true">{head}{lines}{pins}</svg>{chips}</div>'
+    return (f'<figure class="anno"><div class="anno-img"><img src="{root}assets/shots/{src}" alt="{alt}" width="2400" height="{h * 2}" loading="lazy">'
+            f'<svg viewBox="0 0 1200 {h}" aria-hidden="true">{head}{lines}{pins}</svg>{chips}</div>'
             f'<ol class="anno-notes">{items}</ol></figure>')
 
 

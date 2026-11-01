@@ -311,7 +311,8 @@ blockquote { margin: 0; padding-left: 1rem; border-left: 1px solid var(--brass);
   .prices b { font-size: 1.15rem; }
   .prices > div + div { padding-left: .65rem; }
   .top { gap: .7rem 1rem; }
-  .links { order: 3; width: 100%; margin-left: 0; gap: 1.1rem; }
+  .links { order: 3; width: 100%; margin-left: 0; gap: .85rem; }
+  .links a:first-child { display: none; }
   .gh { margin-left: auto; }
   .dl .dlbtns { flex-direction: column; width: min(100%, 20rem); }
   .dl .dlbtns a { width: 100%; }
